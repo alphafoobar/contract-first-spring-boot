@@ -1,0 +1,32 @@
+openapi: 3.0.3
+info:
+  title: Contract first - OpenAPI 3.0
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: demo
+paths:
+  /hello:
+    get:
+      tags:
+        - demo
+      summary: Retrieve a special greeting
+      description: Be welcomed as a person
+      operationId: getGreetings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Greeting'
+components:
+  schemas:
+    Greeting:
+      type: object
+      properties:
+        message:
+          type: string
+          description: A form of greeting
+          example: Bonjour!
