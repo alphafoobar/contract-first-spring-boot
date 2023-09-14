@@ -10,9 +10,6 @@ public class SwaggerValidator {
   private final OpenApiInteractionValidator validator;
 
   public SwaggerValidator(String basePath) {
-    // Initialize and load Swagger/OpenAPI specification files if needed
-    // Example:
-    // validators.put("schemaName", loadValidator("path/to/swagger.yaml"));
     this.basePath = basePath;
     this.validator = loadValidator("src/swagger.yaml");
   }

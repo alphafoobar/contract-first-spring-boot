@@ -5,14 +5,10 @@ import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.model.SimpleResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.MimeType;
-import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -24,12 +20,8 @@ import java.util.Locale;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class DemoControllerComponentTest {
 
-  private static final DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
   @LocalServerPort
   private int port;
-
-  @Autowired
-  ApplicationContext context;
 
   WebTestClient client;
 
@@ -38,7 +30,7 @@ public class DemoControllerComponentTest {
     final var baseUrl = "http://localhost:" + port;
     this.client = WebTestClient.bindToServer()
         .baseUrl(baseUrl) // Configure the base URL
-        .filter(new ObservationFilterFunction(new SwaggerValidator(baseUrl + "/api/v1")))
+        .filter(new OpenApiValidatingFilterFunction(new SwaggerValidator(baseUrl + "/api/v1")))
         .build();
   }
 
@@ -54,11 +46,11 @@ public class DemoControllerComponentTest {
   }
 
 
-  private static class ObservationFilterFunction implements ExchangeFilterFunction {
+  private static class OpenApiValidatingFilterFunction implements ExchangeFilterFunction {
 
     final SwaggerValidator validator;
 
-    ObservationFilterFunction(SwaggerValidator validator) {
+    OpenApiValidatingFilterFunction(SwaggerValidator validator) {
       this.validator = validator;
     }
 
@@ -68,7 +60,6 @@ public class DemoControllerComponentTest {
       return next.exchange(request)
           .flatMap(response -> {
             final var headers = response.headers().asHttpHeaders();
-            final var responseBody = response.body(BodyExtractors.toDataBuffers());
 
             // Validate the request and response
             final var method = Request.Method.valueOf(request.method().name().toUpperCase(Locale.ROOT));
